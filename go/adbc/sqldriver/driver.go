@@ -639,6 +639,10 @@ func (r *rows) Next(dest []driver.Value) error {
 			dest[i] = col.Value(int(r.curRow)).ToTime(col.DataType().(*arrow.Time64Type).Unit)
 		case *array.Timestamp:
 			dest[i] = col.Value(int(r.curRow)).ToTime(col.DataType().(*arrow.TimestampType).Unit)
+		case *array.Decimal128:
+			_, scale, _ := r.ColumnTypePrecisionScale(i)
+			val := col.Value(int(r.curRow))
+			dest[i] = val.ToFloat64(int32(scale))
 		default:
 			return &adbc.Error{
 				Code: adbc.StatusNotImplemented,
